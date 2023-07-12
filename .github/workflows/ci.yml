@@ -69,6 +69,9 @@ jobs:
   docs:
     name: Documentation
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      statuses: write
     steps:
       - uses: actions/checkout@v3
       - uses: julia-actions/setup-julia@v1
@@ -95,12 +98,12 @@ jobs:
             Pkg.add(PackageSpec(path=pwd(), subdir="MRIOperators"))
             Pkg.add(PackageSpec(path=pwd(), subdir="MRICoilSensitivities"))
             Pkg.instantiate()'
+      - uses: julia-actions/julia-buildpkg@v1
+      - uses: julia-actions/julia-docdeploy@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: |
           julia --project=docs -e '
             using Documenter: doctest
             using MRIReco
             doctest(MRIReco)' # change MYPACKAGE to the name of your package
-      - run: julia --project=docs docs/make.jl
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          DOCUMENTER_KEY: ${{ secrets.DOCUMENTER_KEY }}
